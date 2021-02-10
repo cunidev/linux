@@ -446,7 +446,7 @@
 			};
 			spi2_sck_px2 {
 				nvidia,pins = "spi2_sck_px2";
-				nvidia,function = "spi2";
+				nvidia,function = "gmi";
 				nvidia,pull = <TEGRA_PIN_PULL_NONE>;
 				nvidia,tristate = <TEGRA_PIN_DISABLE>;
 				nvidia,enable-input = <TEGRA_PIN_ENABLE>;
@@ -946,7 +946,7 @@
 				nvidia,function = "dap";
 				nvidia,pull = <TEGRA_PIN_PULL_NONE>;
 				nvidia,tristate = <TEGRA_PIN_DISABLE>;
-				nvidia,enable-input = <TEGRA_PIN_ENABLE>;
+				nvidia,enable-input = <TEGRA_PIN_DISABLE>;
 			};
 
 			clk3_req_pee1 {
@@ -1152,6 +1152,8 @@
 			reg = <0x44>;
 
 			interrupts-extended = <&gpio TEGRA_GPIO(Q, 3) IRQ_TYPE_LEVEL_HIGH>;
+
+			vcc-supply = <&vdd_3v3_sen>;
 		};
 
 		/* AsahiKASEI AK8975 magnetometer sensor */
@@ -1159,7 +1161,9 @@
 			compatible = "asahi-kasei,ak8975";
 			reg = <0x0c>;
 
-			vdd-supply = <&vdd_3v3_sys>;
+			vdd-supply = <&vdd_3v3_sen>;
+			vid-supply = <&vdd_1v8>;
+
 			mount-matrix =	"0",  "1",  "0",
 					"1",  "0",  "0",
 					"0",  "0", "-1";
@@ -1172,7 +1176,7 @@
 			interrupt-parent = <&gpio>;
 			interrupts = <TEGRA_GPIO(X, 1) IRQ_TYPE_EDGE_RISING>;
 
-			vdd-supply    = <&vdd_3v3_sys>;
+			vdd-supply = <&vdd_3v3_sen>;
 			vlogic-supply = <&vdd_1v8>;
 
 			mount-matrix =    "0",  "1",  "0",
@@ -1190,6 +1194,9 @@
 
 					interrupt-parent = <&gpio>;
 					interrupts = <TEGRA_GPIO(L, 1) IRQ_TYPE_EDGE_RISING>;
+
+			        	vdd-supply = <&vdd_3v3_sys>;
+			        	vddio-supply = <&vdd_1v8>;
 
 					mount-matrix =   "1",  "0",  "0",
 							 "0", "-1",  "0",
@@ -1217,7 +1224,7 @@
 			compatible = "onnn,nct1008";
 			reg = <0x4c>;
 
-			vcc-supply = <&vdd_3v3_sys>;		/* Might need a vdd_3v3_sensor fixed regulator */
+			vcc-supply = <&vdd_3v3_sen>;
 			#thermal-sensor-cells = <1>;
 		};
 
@@ -1398,6 +1405,16 @@
 		vin-supply = <&vdd_3v3_sys>;
 	};
 
+	vdd_3v3_sen: regulator@3 {
+		compatible = "regulator-fixed";
+		regulator-name = "sen_3v3_en";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		gpio = <&gpio TEGRA_GPIO(K, 5) GPIO_ACTIVE_HIGH>;
+		enable-active-high;
+		vin-supply = <&vdd_3v3_sys>;
+	};
+
 	hdmi_5v0_sys: regulator@4 {
 		compatible = "regulator-fixed";
 		regulator-name = "hdmi_5v0_sys";
@@ -1504,8 +1521,8 @@
 		non-removable;
 
 		mmc-pwrseq = <&brcm_wifi_pwrseq>;
-		vmmc-supply = <&vdd_3v3_sys>;		/* might need vdd_wlan_3v3 fixed */
-		vqmmc-supply = <&vdd_1v8>;		/* might need vdd_wlan_1v8 fixed */
+		vmmc-supply = <&vdd_3v3_sys>;
+		vqmmc-supply = <&vdd_1v8>;
 
 		/* Azurewave AW-NH615 BCM4329 or AW-NH665 BCM4330 */
 		wifi@1 {
@@ -1536,6 +1553,16 @@
 		status = "okay";
 		dr_mode = "peripheral";
 		vbus-supply = <&vdd_5v0_sys>;		/* might need vdd_vbus_micro_usb fixed */
+	};
+
+
+	usb@7d004000 {
+		status = "okay";		
+	};
+
+	usb-phy@7d004000 {
+		status = "okay";
+		vbus-supply = <&vdd_5v0_sys>;		/* might need vdd_vbus_typea_usb fixed */
 	};
 
 	usb@7d008000 {
