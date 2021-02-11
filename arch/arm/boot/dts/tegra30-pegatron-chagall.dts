@@ -1531,6 +1531,7 @@
 
 			interrupt-parent = <&gpio>;
 			interrupts = <TEGRA_GPIO(O, 4) IRQ_TYPE_LEVEL_HIGH>;
+			reset-gpios = <&gpio TEGRA_GPIO(D, 3) GPIO_ACTIVE_LOW>;
 			interrupt-names = "host-wake";
 		};
 	};
@@ -1555,7 +1556,7 @@
 		vbus-supply = <&vdd_5v0_sys>;		/* might need vdd_vbus_micro_usb fixed */
 	};
 
-
+	/* USB modem stays here? Needs gpio166 */ 
 	usb@7d004000 {
 		status = "okay";		
 	};
@@ -1723,9 +1724,9 @@
 	};
 
 	sound {
-		compatible = "nvidia,tegra-audio-wm8903-tf300t",
-			     "nvidia,tegra-audio-wm8903";
-		nvidia,model = "WM8903";
+		compatible = "nvidia,tegra-audio-wm8903-chagall",
+					 "nvidia,tegra-audio-wm8903";
+		nvidia,model = "Chagall WM8903";
 
 		nvidia,audio-routing =
 			"Headphone Jack", "HPOUTR",
@@ -1734,15 +1735,18 @@
 			"Int Spk", "RON",
 			"Int Spk", "LOP",
 			"Int Spk", "LON",
-			"Mic Jack", "MICBIAS",
-			"IN1L", "Mic Jack";
+			//"MICBIAS", "Mic Jack",
+			"IN1R", "MICBIAS",
+			"DMICDAT", "Int Mic";
 
 		nvidia,i2s-controller = <&tegra_i2s1>;
 		nvidia,audio-codec = <&wm8903>;
 
 		nvidia,spkr-en-gpios = <&wm8903 2 GPIO_ACTIVE_HIGH>;
 		nvidia,hp-det-gpios = <&gpio TEGRA_GPIO(W, 2) GPIO_ACTIVE_LOW>;
-		nvidia,hp-mute-gpios = <&gpio TEGRA_GPIO(X, 2) GPIO_ACTIVE_LOW>;
+		//??nvidia,hp-mute-gpios = <&gpio TEGRA_GPIO(X, 2) GPIO_ACTIVE_LOW>;
+		//??nvidia,int-mic-en-gpios = <&wm8903 1 GPIO_ACTIVE_HIGH>;
+		nvidia,headset;
 
 		clocks = <&tegra_car TEGRA30_CLK_PLL_A>,
 			 <&tegra_car TEGRA30_CLK_PLL_A_OUT0>,
